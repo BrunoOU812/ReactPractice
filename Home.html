@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta content="viewport:1.0" />
+        <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+        <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+        <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+        <title>Counter-Game</title>
+    </head>
+    <body>
+        <div id="app"></div>
+    <script type="text/babel">
+        class App extends React.Component{
+    render(){
+        return(
+            <div>
+                <Counter/>
+                <hr/>
+                <SumGame/>
+                <hr/>
+                <ToDoList/>
+                <hr/>
+                <FlashCard  />
+                </div>
+        );
+    }
+}
+/*quiero hacer que el segundo state se genere en función del primero para que la suma de ambos de menos qque 10
+class Counter extends React.Component{
+    constructor(props){
+        super(props)
+        this.state = {
+            num1:Math.ceil(Math.random()*9),
+            num2:this.state.num1,
+            response:"",
+            score:0
+        }
+        this.generator=this.generator.bind(this)
+    }
+    generator=()=>{
+        return this.state.num1;
+    }
+*/
+class Counter extends React.Component{
+    constructor(props){
+        super(props)
+        this.state={
+            counter:0
+        }
+        this.increment=this.increment.bind(this)
+    }    
+    render(){
+            return(
+                <div onKeyPress={this.incrementRightAway}>
+                    <h1>Counter {this.state.counter}</h1>
+                    <button onClick={this.reset}>reset</button>                
+                    <button onClick={this.decrement}>-</button>                
+                    <button  onClick={this.increment}>+</button>
+                </div>
+            )
+        }
+    incrementRightAway=(e)=>{
+        if(e.key==="+"){
+            this.increment()
+        }else if(e.key==="-"){
+            this.decrement()
+        }else if(e.key==="Enter"){
+            this.reset()
+        }
+    }
+
+    increment=()=>{
+        this.setState(state=>({counter:state.counter+1}))
+    }
+    decrement=()=>{
+        this.setState(state=>({counter:state.counter-1}))
+    }
+    reset=()=>{
+        this.setState({counter:0})
+    }
+}
+
+class SumGame extends React.Component{
+    constructor(props){
+        super(props)
+        this.state = {
+            num1:Math.ceil(Math.random()*9),
+            num2:Math.ceil(Math.random()*9),
+            response:"",
+            score:0,
+        }
+        this.renderGame=this.renderGame.bind(this)
+        this.renderWin=this.renderWin.bind(this)
+    }
+    render(){
+        if(this.state.score >=5){
+           return this.renderWin()
+        }else{
+        return this.renderGame()
+    }
+    }
+
+    renderWin(){
+        return(
+            <div>
+                <h1>You Win</h1>
+                <button onClick={this.reset}>Play Again</button>
+                </div>
+        )
+    }
+    reset=()=>{
+        this.setState({score:0})
+    }
+    renderGame(){
+        return(
+            <div>
+                <h1>Sum Game</h1>                
+                <h1>{this.state.num1} + {this.state.num2}</h1>
+                <input onKeyPress={this.answerRightAway} value={this.state.response} onChange={this.handleChange} placeholder="write me an answer..."/>
+                <button onClick={this.handleAnswer}>Answer</button>
+                <h1>Score: {this.state.score}</h1>
+                </div>
+        )
+    }
+    handleChange=(e)=>{
+        this.setState({
+            response:e.target.value
+        })
+    }
+    answerRightAway=(e)=>{
+        if(e.key==="Enter"){
+        this.handleAnswer();
+    }
+    }
+    handleAnswer=()=>{
+        let answer=parseInt(this.state.response)
+        if(answer===this.state.num1+this.state.num2){
+            this.setState({
+                num1:Math.ceil(Math.random()*9),
+                num2:Math.ceil(Math.random()*9),
+                response:"",
+                score:this.state.score+1
+            })
+        }else{
+            this.setState({
+                response:"",
+                score:this.state.score-1
+            })
+        }
+    }
+}
+
+class ToDoList extends React.Component{
+    constructor(props){
+        super(props)
+        this.state={
+            tasks:[],
+            input:""
+        }
+    }
+    handleChange=(e)=>{
+        this.setState(state=>({
+            input:e.target.value
+        }))
+    }
+    addTask=(e)=>{
+        if(e.key==="Enter"){
+        if(this.state.input!="")
+            {this.setState({
+            tasks:[...this.state.tasks,this.state.input.split(",")],
+            input:""
+        })}}
+    }
+    deleteTask=(e)=>{
+        const index=e.target.dataset.index;
+        this.setState(state=>{
+            const tasks= [...state.tasks];
+            tasks.splice(index,1);
+            return {tasks};
+        })
+
+    }
+    render(){
+        return(
+            <div>
+            <h1>To do list! <small>(current n° of tasks: {this.state.tasks.length})</small></h1>
+            <input value={this.state.input} onKeyPress={this.addTask} onChange={this.handleChange} placeholder="write me a task..." required/>
+            <ul>
+                {this.state.tasks
+                    .map((task,i)=><li key="task{i}">{i+1} • {task} • <button data-index={i} onClick={this.deleteTask}>X</button></li>)}
+            </ul>
+            </div>
+        )
+    }
+}
+
+class FlashCard extends React.Component{
+    constructor(props){
+        super(props)
+        this.state={
+            switch:true,
+            cards:[]
+        }
+    }
+    render(){
+        if(this.state.switch){
+            return this.renderEditor();
+        }else{
+            return this.renderViewer();
+        }
+    }
+    switcher=()=>{
+        this.setState({switch:!this.state.switch}
+        )
+        
+    }
+    addCard=(front,back)=>{
+        this.setState(state=>{
+            return {cards:[...this.state.cards,{front,back}]}
+        }) 
+    }
+    deleteCard=(i)=>{
+        this.setState(state=>{
+        const cards=[...state.cards];
+        cards.splice(i,1);
+        return {cards};
+    })
+    }
+    editCard=(i)=>{
+        this.setState(state=>{
+        const cards=[...state.cards];
+        const card=cards.splice(i,1);
+        return {cards};
+    })
+    }
+    renderEditor(){
+        return(
+            <div>
+                <CardEditor deleteCard={this.deleteCard} addCard={this.addCard} cards={this.state.cards} switch={this.switcher}/>    
+            </div>
+        )
+    }
+    renderViewer(){
+        return(
+            <div>
+                <CardViewer deleteCard={this.deleteCard} addCard={this.addCard} cards={this.state.cards} switch={this.switcher}/>    
+            </div>
+        )
+    }
+    
+}
+
+class CardEditor extends React.Component{
+    constructor(props){
+        super(props)
+        this.state={
+            front:"",
+            back:""
+        }
+    }
+    handleChange=(e)=>{
+        this.setState({[e.target.name]:e.target.value})
+    }
+    addCard=()=>{
+        this.props.addCard(this.state.front,this.state.back);
+        this.setState({
+            front:"",
+            back:""
+        })
+    }
+    deleteCard=(e)=>{
+        this.props.deleteCard(e.target.dataset.index)
+    }
+    render(){
+        const style={
+            border: "1px solid black"
+        }
+        const rows=this.props.cards.map((card,i)=>{return (
+            <tr key={i}><td>{card.front}</td><td>{card.back}</td><td><button data-index={i} onClick={this.props.deleteCard}>Delete</button></td></tr>
+            )})
+        return(
+            <div>
+                <h1>This is the CardEditor</h1>
+                <table style={style}>
+                    <thead>
+                        <tr>
+                        <th>Front</th>
+                        <th>Back</th>
+                        <th>N°Cards {this.props.cards.length}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {rows}
+                    </tbody>
+                </table>
+                <input name="front" value={this.state.front} onChange={this.handleChange}/>
+                <input name="back" value={this.state.back} onChange={this.handleChange}/>
+                <button onClick={this.addCard}>Add</button>
+                <hr/>
+                <button onClick={this.props.switch}>switch</button>
+            </div>
+        )
+    }
+}
+class CardViewer extends React.Component{
+    constructor(props){
+        super(props)
+    }
+    render(){
+        return(
+            <div>
+                <h1>This is the CardViewer</h1>
+                <hr/>
+                <button onClick={this.props.switch}>switch</button>
+            </div>
+        )
+    }
+}
+
+ReactDOM.render(<App/>,document.querySelector("#app"));
+    </script>
+</body>
+</html>
