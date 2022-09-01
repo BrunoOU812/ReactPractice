@@ -227,6 +227,13 @@ class FlashCard extends React.Component{
         return {cards};
     })
     }
+    editCard=(i)=>{
+        this.setState(state=>{
+        const cards=[...state.cards];
+        const card=cards.splice(i,1);
+        return {cards};
+    })
+    }
     renderEditor(){
         return(
             <div>
